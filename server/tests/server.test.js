@@ -106,3 +106,51 @@ describe('GET /todos/:id', () => {
             .end(done);
     });
 });
+
+describe('DELETE /todos/:id', () => {
+    it('should remove a todo by id', (done) => {
+        request(app)
+            .delete('/todos/' + todos[0]._id)
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.todo.text).toBe(todos[0].text);
+            })
+            .end((err, res) => {
+                if(err) {
+                    res.status(400);
+                    res.send(err);                    
+                    return done();
+                }
+
+                Todo.count({}, (err, count) => {
+                    if(err) {
+                        res.status(400);
+                        res.send(err);
+                        return done();                        
+                    }
+
+                    expect(count).toBe(1);                    
+                });
+
+                Todo.findById(todos[0]._id).then((todo) => {
+                    expect(todo).toBe(null);
+                    done();
+                }).catch((e) => done(e));
+            });
+    });
+
+    it('should remove a todo - invalid id', (done) => {
+        request(app)
+            .delete('/todos/1234')
+            .expect(400)
+            .expect('Invalid id')
+            .end(done);
+    });
+
+    it('should remove a tod - non existing id', (done) => {
+        request(app)
+            .delete('/todos/55fc2d85e269243178890eee')
+            .expect(404)
+            .end(done);
+    })
+})
