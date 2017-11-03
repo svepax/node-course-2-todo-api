@@ -12,7 +12,9 @@ const todos = [
     },
     {
         _id: new ObjectID(),
-        text: 'Second test todo'
+        text: 'Second test todo',
+        completed: true,
+        completedAt: 3333333
     }
 ]
 
@@ -147,9 +149,62 @@ describe('DELETE /todos/:id', () => {
             .end(done);
     });
 
-    it('should remove a tod - non existing id', (done) => {
+    it('should remove a todo - non existing id', (done) => {
         request(app)
             .delete('/todos/55fc2d85e269243178890eee')
+            .expect(404)
+            .end(done);
+    })
+});
+
+describe('PATCH /todos/:id', () => {
+    it('should update a todo by id - change text', (done) => {
+        request(app)
+            .patch('/todos/' + todos[0]._id)
+            .send({"text": "New text"})
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.todo.text).toBe('New text');
+            })
+            .end(done);
+    });
+
+    it('should update a todo by id - set to completed', (done) => {
+        request(app)
+            .patch('/todos/' + todos[0]._id)
+            .send({"text": "New text"})
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.todo.text).toBe('New text');
+            })
+            .end(done);
+    });
+
+    it('should clear completedAt when todo is not completed', (done) => {
+        request(app)
+        .patch('/todos/' + todos[1]._id)
+        .send({"completed": false})
+        .expect(200)
+        .expect((res) => {
+            console.log(res.body.todo);
+            expect(res.body.todo.completedAt).toBe(null);
+        })
+        .end(done);
+    });
+
+    it('should update a todo - invalid id', (done) => {
+        request(app)
+            .patch('/todos/1234')
+            .send({})
+            .expect(400)
+            .expect('Invalid id')
+            .end(done);
+    });
+
+    it('should update a todo - non existing id', (done) => {
+        request(app)
+            .patch('/todos/55fc2d85e269243178890eee')
+            .send({})
             .expect(404)
             .end(done);
     })

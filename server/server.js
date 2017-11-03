@@ -89,7 +89,7 @@ app.patch('/todos/:id', (req, res) => {
     var body = _.pick(req.body, ['text', 'completed']);
 
     if(!ObjectID.isValid(id)) {
-        return res.status(400).send();
+        return res.status(400).send("Invalid id");
     }
 
     if(_.isBoolean(body.completed) && body.completed) {
@@ -101,10 +101,10 @@ app.patch('/todos/:id', (req, res) => {
 
     Todo.findByIdAndUpdate(id, { $set: body }, {new: true}).then((todo) => {
         if(todo) {
-            return res.status(200).send(todo);
+            return res.status(200).send({todo});
         }
 
-        return res.status(200).send('no todo for id');
+        return res.status(404).send('no todo for id');
     }).catch((e) => {
         res.status(400).send(e);
     });
