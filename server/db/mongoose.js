@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 mongoose.Promise = global.Promise;
+// MONGO_URI ON HEROKU: mongodb://heroku_7k071b68:rksh2vebustp1if5v3q9rd8796@ds245755.mlab.com:45755/heroku_7k071b68
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/TodoApp', { useMongoClient: true }).then(() => {
         console.log('Successfully connected to MongoDB');
     })
