@@ -171,7 +171,6 @@ describe('PATCH /todos/:id', () => {
         .send({"completed": false})
         .expect(200)
         .expect((res) => {
-            console.log(res.body.todo);
             expect(res.body.todo.completedAt).toBe(null);
         })
         .end(done);
@@ -278,6 +277,48 @@ describe('POST /users', () => {
             .post('/users')
             .send({email, password})
             .expect(400)
+            .end(done);
+    });
+});
+
+describe('POST /users/login', () => {
+    it('should login user and return token', (done) => {
+        request(app)
+            .post('/users/login')
+            .send({
+                email: users[1].email,
+                password: users[1].password
+            })
+            .expect(200)
+            .expect((res) => {
+                expect(res.headers['x-auth']).toExist();
+            })
+            .end((err, res) => {
+                if(err) {
+                    return done(err);
+                }
+
+                User.findById(users[1]._id).then((user) => {
+                    expect(user.tokens[0]).toInclude({
+                        access: 'auth',
+                        token: res.headers['x-auth']
+                    });
+                    done();
+                }).catch((e) => done(e));
+            });
+    });
+
+    it('should reject invalid login', (done) => {
+        request(app)
+            .post('/users/login')
+            .send({
+                email: users[0].email,
+                password: 'wrongPwd'
+            })
+            .expect(401)
+            .expect((res) => {
+                expect(res.headers['x-auth']).toNotExist();
+            })
             .end(done);
     });
 });
